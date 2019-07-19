@@ -6,6 +6,7 @@ const helmet = require("helmet");
 const { NODE_ENV } = require("./config");
 const winston = require("winston");
 const bookmarks = require('./store')
+const bookmarksRouter = require('./bookmarks/bookmarks-router')
 
 
 const app = express();
@@ -47,22 +48,8 @@ app.get("/", (req, res) => {
   res.status(200).send('Hello, world!');
 });
 
-app.get("/bookmarks", (req, res) => {
-  res.json(bookmarks);
-});
+app.use(bookmarksRouter)
 
-app.get("/bookmarks/:id", (req, res) => {
-  const { id } = req.params;
-  const singleBookmark = bookmarks.find(bookmark => bookmark.id == id);
-
-  // make sure we found a card
-  if (!singleBookmark) {
-    logger.error(`Bookmark with ${id} does not exist.`);
-    return res.status(404).send("Bookmark not found");
-  }
-
-  res.json(singleBookmark);
-});
 
 app.use(function errorHandler(error, req, res, next) {
   let response;
