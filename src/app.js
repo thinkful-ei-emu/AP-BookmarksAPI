@@ -4,10 +4,9 @@ const morgan = require("morgan");
 const cors = require("cors");
 const helmet = require("helmet");
 const { NODE_ENV } = require("./config");
-const bookmarksRouter = require('./bookmarks/bookmarks-router')
+const bookmarksRouter = require("./bookmarks/bookmarks-router");
 
 //console.log(process.env.API_TOKEN)
-
 
 const app = express();
 
@@ -30,11 +29,10 @@ app.use(function validateBearerToken(req, res, next) {
 });
 
 app.get("/", (req, res) => {
-  res.status(200).send('Hello, world!');
+  res.status(200).send("Hello, world!");
 });
 
-app.use(bookmarksRouter)
-
+app.use(bookmarksRouter);
 
 app.use(function errorHandler(error, req, res, next) {
   let response;
