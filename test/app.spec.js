@@ -120,7 +120,7 @@ describe("POST /bookmarks", () => {
       .expect(400, "Enter a valid rating");
   });
 
-  it("Get 400 if rating is greater than 5 or less than 0", () => {
+  it("Get 400 if rating is greater than 5 or less than 1", () => {
     const dummy = {
       title: "Google",
       url: "https://www.google.com",

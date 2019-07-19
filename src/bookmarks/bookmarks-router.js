@@ -6,7 +6,6 @@ const bodyParser = express.json();
 const validUrl = require("valid-url");
 const logger = require("../logger");
 
-const app = express();
 
 bookmarksRouter
   .route("/bookmarks")
@@ -31,7 +30,7 @@ bookmarksRouter
       return res.status(400).send("Enter a description");
     }
 
-    if (!rating || rating < 0 || rating > 5) {
+    if (!rating || rating < 1 || rating > 5) {
       logger.error(`Valid rating is required`);
       return res.status(400).send("Enter a valid rating");
     }
