@@ -46,6 +46,7 @@ bookmarksRouter
 
     bookmarks.push(bookmark)
 
+    //logger.info(`Bookmark created.`)
     res
       .status(201)
       .location(`http://localhost:8000/bookmarks/${bookmark.id}`)
