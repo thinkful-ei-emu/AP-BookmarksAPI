@@ -17,7 +17,7 @@ app.use(cors());
 
 const bookmarks = [
   {
-    id: uuid(),
+    id: "bd5b9402-04c6-4ee6-ba89-e19093235ff9",
     title: "Google",
     url: "https://www.google.com",
     description: "Search some things",
@@ -25,7 +25,7 @@ const bookmarks = [
   },
 
   {
-    id: uuid(),
+    id: "5a31bb52-c468-433f-a784-49734266b8cd",
     title: "Facebook",
     url: "https://www.facebook.com",
     description: "Look people up",
@@ -33,7 +33,7 @@ const bookmarks = [
   },
 
   {
-    id: uuid(),
+    id: "8e6eb7c2-21ea-40c3-9908-5c9db505fcb7",
     title: "Twitter",
     url: "https://www.twitter.com",
     description: "Tweet some stuff",
@@ -71,11 +71,22 @@ app.get("/", (req, res) => {
   res.json("Hello World");
 });
 
-app.get('/bookmarks', (req, res) => {
+app.get("/bookmarks", (req, res) => {
+  res.json(bookmarks);
+});
 
-    res.json(bookmarks);
+app.get("/bookmarks/:id", (req, res) => {
+  const { id } = req.params;
+  const singleBookmark = bookmarks.find(bookmark => bookmark.id == id);
 
-  });
+  // make sure we found a card
+  if (!singleBookmark) {
+    logger.error(`Bookmark with ${id} does not exist.`);
+    return res.status(404).send("Bookmark not found");
+  }
+
+  res.json(singleBookmark);
+});
 
 app.use(function errorHandler(error, req, res, next) {
   let response;
