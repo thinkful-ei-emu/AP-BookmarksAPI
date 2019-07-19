@@ -2,6 +2,7 @@ const express = require("express");
 const bookmarksRouter = express.Router();
 const bookmarks = require("../store");
 
+
 const app = express();
 
 bookmarksRouter.route("/bookmarks").get((req, res) => {
@@ -13,7 +14,7 @@ bookmarksRouter.route("/bookmarks/:id").get((req, res) => {
     const singleBookmark = bookmarks.find(bookmark => bookmark.id == id);
 
     if (!singleBookmark) {
-      logger.error(`Bookmark with ${id} does not exist.`);
+      //logger.error(`Bookmark with ${id} does not exist.`);
       return res.status(404).send("404 Not Found");
     }
 

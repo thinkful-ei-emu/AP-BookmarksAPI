@@ -8,6 +8,8 @@ const winston = require("winston");
 const bookmarks = require('./store')
 const bookmarksRouter = require('./bookmarks/bookmarks-router')
 
+//console.log(process.env.API_TOKEN)
+
 
 const app = express();
 
