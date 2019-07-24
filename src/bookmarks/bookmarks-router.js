@@ -21,6 +21,7 @@ bookmarksRouter
         rating: bookmark.rating,
       })))
     })
+    .catch(next)
   })
   .post(bodyParser, (req, res) => {
     const { title, url, description, rating } = req.body;
@@ -64,16 +65,27 @@ bookmarksRouter
 
 bookmarksRouter
   .route("/bookmarks/:id")
-  .get((req, res) => {
+  .get((req, res, next) => {
     const { id } = req.params;
-    const singleBookmark = bookmarks.find(bookmark => bookmark.id == id);
 
-    if (!singleBookmark) {
-      logger.error(`Bookmark with ${id} does not exist.`);
-      return res.status(404).send("404 Not Found");
-    }
+    BookmarksService.getById(req.app.get('db'), id)
+    .then(bookmark=>{
+      if (!bookmark) {
+        logger.error(`Bookmark with ${id} does not exist.`);
+        return res.status(404).send("404 Not Found");
+      }
+      res.json({
+        id: bookmark.id,
+        title: bookmark.title,
+        url: bookmark.url,
+        description: bookmark.description,
+        rating: bookmark.rating,
+    })
+    })
+    .catch(next)
 
-    res.json(singleBookmark);
+   
+
   })
   .delete((req, res) => {
     const { id } = req.params;
