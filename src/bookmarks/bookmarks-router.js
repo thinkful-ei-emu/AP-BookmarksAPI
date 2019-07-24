@@ -7,7 +7,6 @@ const validUrl = require("valid-url");
 const logger = require("../logger");
 const BookmarksService = require("../bookmarks-service")
 
-
 bookmarksRouter
   .route("/bookmarks")
   .get((req, res, next) => {
@@ -72,7 +71,9 @@ bookmarksRouter
     .then(bookmark=>{
       if (!bookmark) {
         logger.error(`Bookmark with ${id} does not exist.`);
-        return res.status(404).send("404 Not Found");
+        return res.status(404).json({
+          error: {message: 'Bookmark does not exist'}
+        });
       }
       res.json({
         id: bookmark.id,
