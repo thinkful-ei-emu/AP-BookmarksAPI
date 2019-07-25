@@ -7,9 +7,10 @@ const validUrl = require("valid-url");
 const logger = require("../logger");
 const xss = require('xss')
 const BookmarksService = require("../bookmarks-service");
+const path = require('path')
 
 bookmarksRouter
-  .route("/bookmarks")
+  .route("/")
   .get((req, res, next) => {
     BookmarksService.getAllBookmarks(req.app.get("db"))
       .then(bookmarks => {
@@ -60,7 +61,7 @@ bookmarksRouter
         logger.info(`Bookmark created with id ${bookmark.id}.`);
         res
           .status(201)
-          .location(`/bookmarks/${bookmark.id}`)
+          .location(path.posix.join(req.originalUrl, `/${bookmark.id}`))
           .json({
               id: bookmark.id,
               title: xss(bookmark.title),
@@ -73,7 +74,7 @@ bookmarksRouter
   })
 
 bookmarksRouter
-  .route("/bookmarks/:id")
+  .route("/:id")
   .all((req, res, next)=>{
     BookmarksService.getById(
       req.app.get('db'),
@@ -111,6 +112,25 @@ bookmarksRouter
       res.status(204).end();
     })
     .catch(next)
-  });
+  })
+  .patch(bodyParser, (req, res, next)=>{
+    const {title, url, description, rating} = req.body
+    const bookmarkToUpdate = {title, url, description, rating}
+
+    const numberOfValues = Object.values(bookmarkToUpdate).filter(Boolean).length
+    if(numberOfValues === 0){
+      return res.status(400).json({error: {message: `Request body must contain either 'title', 'url', or 'rating'`}})
+    }
+
+    BookmarksService.updateBookmark(
+      req.app.get('db'),
+      req.params.id,
+      bookmarkToUpdate
+    )
+    .then(response=>{
+      res.status(204).end()
+    })
+    .catch(next)
+  })
 
 module.exports = bookmarksRouter;
