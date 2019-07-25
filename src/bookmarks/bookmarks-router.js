@@ -5,6 +5,7 @@ const uuid = require("uuid/v4");
 const bodyParser = express.json();
 const validUrl = require("valid-url");
 const logger = require("../logger");
+const xss = require('xss')
 const BookmarksService = require("../bookmarks-service");
 
 bookmarksRouter
@@ -15,9 +16,9 @@ bookmarksRouter
         res.json(
           bookmarks.map(bookmark => ({
             id: bookmark.id,
-            title: bookmark.title,
+            title: xss(bookmark.title),
             url: bookmark.url,
-            description: bookmark.description,
+            description: xss(bookmark.description),
             rating: bookmark.rating
           }))
         );
@@ -62,9 +63,9 @@ bookmarksRouter
           .location(`/bookmarks/${bookmark.id}`)
           .json({
               id: bookmark.id,
-              title: bookmark.title,
+              title: xss(bookmark.title),
               url: bookmark.url,
-              description: bookmark.description,
+              description: xss(bookmark.description),
               rating: bookmark.rating
             })
   })
@@ -91,11 +92,11 @@ bookmarksRouter
   })
   .get((req, res, next) => {
         res.json({
-          id: bookmark.id,
-          title: bookmark.title,
-          url: bookmark.url,
-          description: bookmark.description,
-          rating: bookmark.rating
+          id: res.bookmark.id,
+          title: xss(res.bookmark.title),
+          url: res.bookmark.url,
+          description: xss(res.bookmark.description),
+          rating: res.bookmark.rating
         });
   })
   .delete((req, res, next) => {

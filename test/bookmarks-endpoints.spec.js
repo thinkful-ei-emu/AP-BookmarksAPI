@@ -47,7 +47,7 @@ describe.only("Bookmarks Endpoints", function() {
     });
   });
 
-  describe("GET /bookmarks/:id", () => {
+  describe.only("GET /bookmarks/:id", () => {
     context("Given no bookmarks", () => {
       it("responds with 404", () => {
         const bookmarkId = 123;
@@ -71,6 +71,35 @@ describe.only("Bookmarks Endpoints", function() {
           .get(`/bookmarks/${bookmarkId}`)
           .set("Authorization", `Bearer ${process.env.API_TOKEN}`)
           .expect(200, expectedBookmark);
+      });
+    });
+
+    context("Given an XSS attack", () => {
+      const maliciousBookmark = {
+        id: 911,
+        title: 'Naughty naughty very naughty <script>alert("xss");</script>',
+        url: "https://www.google.com",
+        description: `Bad image <img src="https://url.to.file.which/does-not.exist" onerror="alert(document.cookie);">. But not <strong>all</strong> bad.`,
+        rating: 1
+      };
+
+      beforeEach("insert malicious bookmark", () => {
+        return db.into("bookmarks").insert([maliciousBookmark]);
+      });
+
+      it("removes XSS attack", () => {
+        return supertest(app)
+          .get(`/bookmarks/${maliciousBookmark.id}`)
+          .set("Authorization", `Bearer ${process.env.API_TOKEN}`)
+          .expect(200)
+          .expect(res => {
+            expect(res.body.title).to.eql(
+              'Naughty naughty very naughty <script>alert("xss");</script>'
+            );
+            expect(res.body.description).to.eql(
+              `Bad image <img src="https://url.to.file.which/does-not.exist" onerror="alert(document.cookie);">. But not <strong>all</strong> bad.`
+            );
+          });
       });
     });
   });
@@ -159,9 +188,8 @@ describe.only("Bookmarks Endpoints", function() {
   describe.only("DELETE /bookmarks/:id", () => {
     context("Given no bookmarks", () => {
       it("responds with 404", () => {
-        
         return supertest(app)
-          .delete('/bookmarks/123213123')
+          .delete("/bookmarks/123213123")
           .set("Authorization", `Bearer ${process.env.API_TOKEN}`)
           .expect(404, { error: { message: `Bookmark does not exist` } });
       });
@@ -176,7 +204,8 @@ describe.only("Bookmarks Endpoints", function() {
       it("responds with 204 and removes specified article", () => {
         const idToRemove = 2;
         const expectedBookmark = testBookmarks.filter(
-          bookmark => bookmark.id !== idToRemove);
+          bookmark => bookmark.id !== idToRemove
+        );
         return supertest(app)
           .delete(`/bookmarks/${idToRemove}`)
           .set("Authorization", `Bearer ${process.env.API_TOKEN}`)
