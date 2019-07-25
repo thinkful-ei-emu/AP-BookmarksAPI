@@ -73,17 +73,23 @@ bookmarksRouter
 
 bookmarksRouter
   .route("/bookmarks/:id")
+  .all((req, res, next)=>{
+    BookmarksService.getById(
+      req.app.get('db'),
+      req.params.id
+    )
+    .then(bookmark=>{
+      if(!bookmark){
+        return res.status(404).json({
+          error: {message: 'Bookmark does not exist'}
+        })
+      }
+      res.bookmark = bookmark
+      next()
+    })
+    .catch(next)
+  })
   .get((req, res, next) => {
-    const { id } = req.params;
-
-    BookmarksService.getById(req.app.get("db"), id)
-      .then(bookmark => {
-        if (!bookmark) {
-          logger.error(`Bookmark with ${id} does not exist.`);
-          return res.status(404).json({
-            error: { message: "Bookmark does not exist" }
-          });
-        }
         res.json({
           id: bookmark.id,
           title: bookmark.title,
@@ -91,8 +97,6 @@ bookmarksRouter
           description: bookmark.description,
           rating: bookmark.rating
         });
-      })
-      .catch(next);
   })
   .delete((req, res, next) => {
     const { id } = req.params;

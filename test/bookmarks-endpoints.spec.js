@@ -105,6 +105,34 @@ describe.only("Bookmarks Endpoints", function() {
         });
     });
 
+    it("responds with 400 invalid rating if not between 1 and 5", () => {
+      const bookmark = {
+        title: "test",
+        url: "https://www.google.com",
+        description: "test",
+        rating: "13"
+      };
+      return supertest(app)
+        .post(`/bookmarks`)
+        .send(bookmark)
+        .set("Authorization", `Bearer ${process.env.API_TOKEN}`)
+        .expect(400, "Enter a valid rating");
+    });
+
+    it("responds with 400 invalid url if not valid", () => {
+      const bookmark = {
+        title: "test",
+        url: "test",
+        description: "test",
+        rating: "3"
+      };
+      return supertest(app)
+        .post(`/bookmarks`)
+        .send(bookmark)
+        .set("Authorization", `Bearer ${process.env.API_TOKEN}`)
+        .expect(400, "Enter a valid url");
+    });
+
     const requiredFields = ["title", "url", "rating"];
     requiredFields.forEach(field => {
       const newBookmark = {
@@ -123,6 +151,41 @@ describe.only("Bookmarks Endpoints", function() {
           .send(newBookmark)
           .expect(400, {
             error: { message: `Missing ${field} is request body` }
+          });
+      });
+    });
+  });
+
+  describe.only("DELETE /bookmarks/:id", () => {
+    context("Given no bookmarks", () => {
+      it("responds with 404", () => {
+        
+        return supertest(app)
+          .delete('/bookmarks/123213123')
+          .set("Authorization", `Bearer ${process.env.API_TOKEN}`)
+          .expect(404, { error: { message: `Bookmark does not exist` } });
+      });
+    });
+    context("Given bookmarks are in database", () => {
+      const testBookmarks = makeBookmarksArray();
+
+      beforeEach("insert bookmarks", () => {
+        return db.into("bookmarks").insert(testBookmarks);
+      });
+
+      it("responds with 204 and removes specified article", () => {
+        const idToRemove = 2;
+        const expectedBookmark = testBookmarks.filter(
+          bookmark => bookmark.id !== idToRemove);
+        return supertest(app)
+          .delete(`/bookmarks/${idToRemove}`)
+          .set("Authorization", `Bearer ${process.env.API_TOKEN}`)
+          .expect(204)
+          .then(res => {
+            supertest(app)
+              .get("/bookmarks")
+              .set("Authorization", `Bearer ${process.env.API_TOKEN}`)
+              .expect(expectedBookmark);
           });
       });
     });
